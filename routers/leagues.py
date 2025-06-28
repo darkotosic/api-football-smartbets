@@ -4,7 +4,7 @@ from fastapi import APIRouter, HTTPException
 from typing import List, Optional
 
 from models import League, LeagueSeasonList
-from smartbets_API.api_football import get_leagues, get_league_seasons
+from smartbets_API.api_football import get_leagues, get_seasons
 
 router = APIRouter(prefix="/leagues", tags=["leagues"])
 
@@ -21,7 +21,7 @@ async def read_leagues(country: Optional[str] = None) -> List[League]:
 @router.get("/{league_id}/seasons", response_model=LeagueSeasonList)
 async def read_league_seasons(league_id: int) -> LeagueSeasonList:
     try:
-        payload = await get_league_seasons(league_id)
+        payload = await get_seasons(league_id)(league_id)
         resp = payload.get("response", [])
         if not resp:
             raise HTTPException(status_code=404, detail="League not found")
