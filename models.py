@@ -2,12 +2,16 @@
 
 from __future__ import annotations
 from typing import List, Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 
 class CustomBaseModel(BaseModel):
-    class Config:
-        extra = "ignore"
-        allow_population_by_field_name = True
+    # Pydantic v2: extra polja ignorišemo, a dozvoljavamo 
+    # populaciju po aliasu (field_name <-> alias)
+    model_config = ConfigDict(
+        extra="ignore",
+        populate_by_name=True,
+    )
+
 
 
 # ── 1. COUNTRIES ─────────────────────────────────────────────────────────────────
