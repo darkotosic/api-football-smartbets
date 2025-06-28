@@ -1,6 +1,8 @@
 # routers/predictions.py
+
 from fastapi import APIRouter, HTTPException
 from typing import Optional, List
+
 from models import PredictionResponse
 from smartbets_API.predictor import Predictor
 
@@ -12,17 +14,22 @@ async def read_predictions(
     league: int,
     season: int,
     bookmaker: Optional[int] = None
-):
+) -> List[PredictionResponse]:
     """
     Vraća predikcije za sve utakmice tog datuma.
     query params:
-      - date: YYYY-MM-DD
+      - date: YYYY-MM-DD (obavezno)
       - league: ID lige (obavezno)
       - season: godina sezone (obavezno)
-      - bookmaker: opcioni ID kladionice
+      - bookmaker: ID kladionice (opciono)
     """
     try:
         predictor = Predictor(league=league, season=season, bookmaker=bookmaker)
-        return await predictor.predict_by_date(date)
+        predictions = await predictor.predict_by_date(date)
+        return predictions
+    except HTTPException:
+        # Propagiramo specifične HTTP greške
+        raise
     except Exception as e:
+        # Ostalo tretiramo kao 500
         raise HTTPException(status_code=500, detail=str(e))
