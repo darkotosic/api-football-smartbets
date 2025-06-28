@@ -1,243 +1,144 @@
-<h1 align="center">smartbetsAPI</h1>
-<p align="center">
- <a href="https://github.com/Simatwa/smartbetsAPI"><img alt="Github" src="https://img.shields.io/static/v1?logo=github&color=blueviolet&label=Test&message=Passing"/></a> <a href="LICENSE"><img alt="License" src="https://img.shields.io/static/v1?logo=GPL&color=Blue&message=GPL-v3&label=License"/></a> <a href="https://pypi.org/project/smartbetsAPI"><img alt="PyPi" src="https://img.shields.io/pypi/v/smartbetsAPI?color=green"/></a> <a href="https://github.com/psf/black"><img alt="Black" src="https://img.shields.io/static/v1?logo=Black&label=Code-style&message=Black"/></a> <a href="#"><img alt="Accuracy" src="https://img.shields.io/static/v1?logo=accuracy&label=Accuracy&message=55%&color=yellow"/></a> <a href="#"><img alt="Passing" src="https://img.shields.io/static/v1?logo=Docs&label=Docs&message=Passing&color=green"/></a> <a href="#"><img alt="coverage" src="https://img.shields.io/static/v1?logo=Coverage&label=Coverage&message=100%&color=yellowgreen"/></a>  <a href="#" alt="progress"><img alt="Progress" src="https://img.shields.io/static/v1?logo=Progress&label=Progress&message=95%&color=green"/></a>  <a href="https://pepy.tech/project/smartbetsapi"><img src="https://static.pepy.tech/personalized-badge/smartbetsapi?period=total&units=international_system&left_color=grey&left_text=Downloads" alt="Downloads"></a></p><br>
- 
- > "Punter's choice"
+# API-Football Smartbets
 
- Worldwide soccer-matches predictor with Fast-API and a package for integrating the scripts in your own [Python](https://python.org) code.
+**FastAPI servis za predikcije i podatke iz API-Football v3**
 
- ## Features
+---
 
- - REST-API
- - Script integration (package)
- - Non-ML
+## Pregled
 
- ## Installation and usage
+Ovaj projekat je REST API izgrađen pomoću FastAPI-a koji obezbeđuje pristup raznovrsnim podacima iz [API-Football v3](https://www.api-football.com/):
 
- ### Installation
+* **Countries** ( `/countries/`)
+* **Leagues** ( `/leagues/` i `/leagues/{league_id}/seasons`)
+* **Teams** ( `/teams/` i `/teams/{team_id}/statistics`)
+* **Standings** ( `/standings/`)
+* **Fixtures** ( `/fixtures/`, `/fixtures/rounds`, `/fixtures/head2head`, `/fixtures/{id}/statistics`, `/fixtures/{id}/events`)
+* **Predictions** ( `/predictions/` i `/predictions-api/`)
+* **Odds (Pre-Match)** ( `/odds/`, `/odds/mapping`, `/odds/bookmakers`)
 
-*Python 3.9+* is required for this script to be fruitful to you. 
-- Installing through pip is always the most preferred way:
+Svaki endpoint vraća čist JSON niz objekata (pomoću Pydantic modela iz `models.py`).
 
- ```sh
- pip  install smartbetsAPI
- 
- ```
+---
 
- - For those who like enjoying the **latest** releases from [Github](https://github.com) like [me](https://github.com/Simatwa), rather than  waiting for the next one:
+## Quickstart
 
- ```sh
- pip install git+https://github.com/Simatwa/smartbetsAPI.git
+### 1. Kloniraj repo
 
- ```
-
-To install it alongside `REST-API`  dependencies simply run:
-
-```sh
-pip install "smartbetsapi[api]"
+```bash
+git clone https://github.com/darkotosic/api-football-smartbets.git
+cd api-football-smartbets
 ```
 
-### Usage
+### 2. Kreiraj virtuelno okruženje i instaliraj zavisnosti
 
-1. Terminal
-
- Running `$ smartbetsAPI <token/password>`  will fire up the FastAPI server with the following default configurations.
-
-<table align="center"> 
-<thead>
-<tr><th>Command        </th><th>Default  </th></tr>
-</thead>
-<tbody>
-<tr><td>Port           </td><td>8000     </td></tr>
-<tr><td>Username       </td><td>API</td></tr>
-<tr><td>Filename       </td><td>None     </td></tr>
-<tr><td>level (Logging)</td><td>20       </td></tr>
-<tr><td>host           </td><td>False    </td></tr>
-<tr><td>debug          </td><td>False    </td></tr>
-<tr><td>no-net         </td><td>False    </td></tr>
-<tr><td>log            </td><td>False    </td></tr>
-<tr><td>colorize       </td><td>False    </td></tr>
-<tr><td>gui (Termux)   </td><td>False    </td></tr>
-</tbody>
-</table>
-
-- For instance :
-
-```sh
- $ smartbetsAPI mypass9876
-
+```bash
+python -m venv .venv
+source .venv/bin/activate   # Linux/Mac
+.\.venv\Scripts\activate  # Windows
+pip install -r requirements.txt
 ```
 
-> [!TIP]
-> `Docs` will be available at : http://localhost:8000/v1/docs
-> `Redoc` will be available at : http://localhost:8000/v1/redoc
+### 3. Postavi API ključ
 
-Here is an example of a [simple program](examples/bet_at_rest_api_level.py) that makes prediction using the REST API.
-
-![api running](assets/api_running.gif)
-
-> [!Note]
-> Reinstall with `sudo` privileges if `smartbetsAPI` command can't be found.
-
-> Example predicting using REST API
-
-```py
-from smartbets_API import predictor
-predict = predictor('http://localhost:8080','password')
-bets=predict.get_predictions('Arsenal','Manchester')
-print(bets)
-#Output
-#(True, {'choice': 55.56, 'g': 14.0, 'gg': 80.0, 'ov15': 80.0, 'ov25': 65.0, 'ov35': 55.0, 'pick': 'ov15', 'result': '1'})
-```
-
-
-* For more information you can run `smartbetsAPI -h` 
-
-
-2. Importing Package
-
-Module `predictor`  provides two ways of interacting with it at the programming level, based on the `data-type` in which the teams have been packed and parsed to it:
-
-* Using `predictorL` object which accepts *teams* (**List** data-type).
-> For [example](examples/predict_using_list.py):
-
-```py
-#!/usr/bin/env python3
-from smartbets_API.predictor import predictor
-
-teams = [
-    "Napoli",  # Home team (index [0])
-    "AC Milan",  # Away team (index [1])
-]
-# Instantiating predictor
-predict = predictor()
-
-# Using predictorL object to handle teams (List data-type)
-predictions = predict.predictorL(teams)
-
-# Display info
-print(predictions)
-
-#Output
-#{'g': 8.0, 'gg': 65.0, 'ov15': 70.0, 'ov25': 40.0, 'ov35': 30.0, 'choice': 60.0, 'result': '2', 'pick': 'ov15'}
+Kreiraj fajl `.env` u korenu projekta:
 
 ```
-
-* Using `predictorD` object which takes *teams* (**Dictionary** data-type):
-> For [example](examples/predict_using_dict.py):
-
-```py
-#!/usr/bin/env python3
-from smartbets_API.predictor import predictor
-
-teams = {
-    1: "Manchester City",  # 1 for home-team
-    2: "Liverpool",  # 2 for away-team
-}
-
-# Instantiating predictor
-predict = predictor()
-
-# Using predictorD object to handle teams (Dictionary data-type)
-predictions = predict.predictorD(teams)
-
-# Display info
-print(predictions)
-
-#Output
-#{'g': 8.0, 'gg': 65.0, 'ov15': 60.0, 'ov25': 45.0, 'ov35': 30.0, 'choice': 56.16, 'result': '1', 'pick': 'gg'}
-
+API_FOOTBALL_KEY=YOUR_API_FOOTBALL_KEY_HERE
 ```
 
-- The output initials are explained in the table below.
+### 4. Pokreni server
 
-<table>
-<thead>
-<tr><th>Parameter  </th><th>Function                                                 </th></tr>
-</thead>
-<tbody>
-<tr><td>g          </td><td>Goal-average of the two teams                              </td></tr>
-<tr><td>gg         </td><td>Probability of both teams to score                         </td></tr>
-<tr><td>ov15       </td><td>Probability of having more than 2 goals                    </td></tr>
-<tr><td>ov25       </td><td>Probability of having more than 3 goals                    </td></tr>
-<tr><td>ov35       </td><td>Probability of having more than 4 goals                    </td></tr>
-<tr><td>choice     </td><td>Probability of the specified &#x27;result&#x27; to occur            </td></tr>
-<tr><td>result     </td><td>The most suitable outcome from [1,1x,x,2x,2]                  </td></tr>
-<tr><td>pick       </td><td>The most suitable outcome from [1,1x,x,2x,2,gg,ov15,ov25,ov35]</td></tr>
-</tbody>
-</table>
+```bash
+uvicorn main:app --reload
+```
 
-> **Note** 
-  - Probabilities are in percentange (%)
+Otvorite [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) za Swagger UI.
 
-#### Further info 
+---
 
-The `predictor` _class_ accepts multiple parameters that includes :
+## Primeri upotrebe
 
-<table>
-<thead>
-<tr><th>Parameter       </th><th>Function                                              </th><th>Default  </th></tr>
-</thead>
-<tbody>
-<tr><td>include_position</td><td>Include team&#x27;s league ranking in making predictions     </td><td>False    </td></tr>
-<tr><td>log             </td><td>Log at api default log&#x27;s path                           </td><td>False    </td></tr>
-<tr><td>level           </td><td>Logging level                                           </td><td>0        </td></tr>
-<tr><td>filename        </td><td>Log to the filename specified                           </td><td>None     </td></tr>
-<tr><td>color           </td><td>Colorize the logs                                       </td><td>False    </td></tr>
-<tr><td>gui             </td><td>Run with some Graphical interface notifications (Termux)</td><td>False    </td></tr>
-<tr><td>api             </td><td>Run with api-server&#x27;s configurations                    </td><td>False    </td></tr>
-</tbody>
-</table>
+#### Dohvati sve države
 
-The two predictor's object (`predictorD`, `predictorL`) accepts two parameters i.e.
-* **teams** - Required
-* **net** - Source of team's data - Default `True` (Online)
+```bash
+curl -X GET "http://127.0.0.1:8000/countries/" -H "accept: application/json"
+```
 
-## Source of data
+#### Dohvati lige po državi
 
-Team performances are sourced from [Soccerway](https://int.soccerway.com) after retrieving the *uri* from [Google](https://www.google.com).
+```bash
+curl "http://127.0.0.1:8000/leagues/?country=England"
+```
 
-> **Warning** Copyright related issues are liable to the user of this script!
+#### Dohvati sezone za ligu
 
-## Disclaimer
+```bash
+curl "http://127.0.0.1:8000/leagues/39/seasons"
+```
 
-This project aims to help *punters* and *bookmarkers* to make informed and well researched soccer-predictions. Nevertheless, it is important to specify that 100% accuracy does not exist and smartbetsAPI can't guarantee the accuracy of the predictions. It is therefore your responsibility to trust the information generated by smartbetsAPI after evaluating its reliability. As the [creator](https://github.com/Simatwa), I **CANNOT** be held responsible for any loss of capital that may occur during the use of this program.
+#### Dohvati timove u ligi i sezoni
 
-## Contributing and Support
+```bash
+curl "http://127.0.0.1:8000/teams/?league=39&season=2025"
+```
 
-### Contributing
+#### Dohvati plasman (standings)
 
-Contributions are always welcome! <br>
-Please take a look at the [Contribution guidelines](CONTRIBUTING.md). <br>
-Feel free to open an [Issue](https://github.com/Simatwa/smartbetsAPI/issues) or to [Fork](https://github.com/Simatwa/smartbetsAPI/fork) this repo.
+```bash
+curl "http://127.0.0.1:8000/standings/?league=39&season=2025"
+```
 
-### ToDo
+#### Dohvati utakmice za datum
 
-- [ ] Upgrade to Machine learning
-- [ ] Improve algorithim's accuracy
-- [ ] General code improvements
-- [ ] Fix bugs
+```bash
+curl "http://127.0.0.1:8000/fixtures/?date=2025-06-28&league=39&season=2025"
+```
 
-### Support 
+#### Dohvati head-to-head statistiku
 
-Consider donating to this project if you find it useful:
-<p align="center">
-<a href="https://www.paypal.com/donate/?hosted_button_id=KLNYKSGUXY8R2"><img src="https://img.shields.io/static/v1?logo=paypal&message=Donate&color=blueviolet&label=Paypal"/></a>
-</p>
+```bash
+curl "http://127.0.0.1:8000/fixtures/head2head?team1=40&team2=41&season=2025"
+```
 
-### API Health Status
+#### Dohvati predikcije (API-Football)
 
-| No. | API | Status |
-|--------|-----|--------|
-| 1. | [On-render](https://smartbetsapi.onrender.com)  | [cron-job](https://lfx48519.status.cron-job.org) |
+```bash
+curl "http://127.0.0.1:8000/predictions-api/?fixture=123456&bookmaker=8"
+```
 
-## Credits
+#### Dohvati kvote pre-match
 
-- [x] [Soccerway](https://int.soccerway.com)
-- [x] [Google](https://www.google.com)
-- [x] [Python.org](https://python.org)
+```bash
+curl "http://127.0.0.1:8000/odds/?fixture=123456&bookmaker=8"
+```
 
-## Special Thanks
+---
 
-* [x] [victhepythonista](https://github.com/victhepythonista)
-* [x] YOU.
+## Razvoj i doprinos
+
+1. Preuzmi projekat i kreiraj novu granu:
+
+   ```bash
+   ```
+
+git checkout -b feature/moja-nova-funkcija
+
+```
+2. Dodaj izmene, napiši testove u `tests/`
+3. Pošalji Pull Request
+
+---
+
+## Preporuke za dalje
+
+- **Pydantic modeli**: u `models.py` definiši `Country`, `League`, `Team`, `Fixture`, `Prediction`, `Odds` itd.
+- **Testovi**: dodaj `pytest` testove u `tests/` folder. Pokreni `pytest` pre svakog commita.
+- **Docker**: napiši `Dockerfile` i `docker-compose.yml` za lako deploy-ovanje.
+- **Cache / rate limiting**: implementiraj `fastapi-cache` ili Redis TTL za zahtevne rute.
+- **Error handling**: koristi specifične `HTTPException(status_code=...)` i loguj greške.
+
+---
+
+© 2025 darkotosic – Open‑source (MIT)
+
+```
