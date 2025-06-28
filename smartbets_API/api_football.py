@@ -100,3 +100,93 @@ async def get_head_to_head(
     """
     params = {"team": team, "opponent": opponent}
     return await _get("/fixtures/headtohead", params)
+
+# -- Countries ---------------------------------------------------------------
+async def get_countries() -> Dict[str, Any]:
+    """GET /countries"""
+    return await _get("/countries")
+
+# -- Leagues -----------------------------------------------------------------
+async def get_leagues(country: Optional[str] = None) -> Dict[str, Any]:
+    """GET /leagues?country=<country>"""
+    params = {"country": country} if country else None
+    return await _get("/leagues", params=params)
+
+async def get_seasons(league: int) -> Dict[str, Any]:
+    """GET /leagues/seasons?league=<league>"""
+    return await _get("/leagues/seasons", params={"league": league})
+
+# -- Teams -------------------------------------------------------------------
+async def get_teams(league: int, season: int) -> Dict[str, Any]:
+    """GET /teams?league=<league>&season=<season>"""
+    return await _get("/teams", params={"league": league, "season": season})
+
+async def get_team_statistics(team: int, league: int, season: int) -> Dict[str, Any]:
+    """GET /teams/statistics?team=<team>&league=<league>&season=<season>"""
+    return await _get("/teams/statistics", params={
+        "team": team, "league": league, "season": season
+    })
+
+# -- Standings ---------------------------------------------------------------
+async def get_standings(league: int, season: int) -> Dict[str, Any]:
+    """GET /standings?league=<league>&season=<season>"""
+    return await _get("/standings", params={"league": league, "season": season})
+
+# -- Fixtures ----------------------------------------------------------------
+async def get_fixtures_rounds(league: int, season: int) -> Dict[str, Any]:
+    """GET /fixtures/rounds?league=<league>&season=<season>"""
+    return await _get("/fixtures/rounds", params={"league": league, "season": season})
+
+async def get_fixtures(
+    date: Optional[str] = None,
+    league: Optional[int] = None,
+    season: Optional[int] = None,
+    status: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Opšti GET /fixtures sa parametrima date, league, season, status"""
+    params = {}
+    for k, v in (("date", date), ("league", league), ("season", season), ("status", status)):
+        if v is not None:
+            params[k] = v
+    return await _get("/fixtures", params=params)
+
+async def get_head2head(team1: int, team2: int, season: Optional[int] = None) -> Dict[str, Any]:
+    """GET /fixtures/headtohead?team1=<>&team2=<>[&season=<>]"""
+    params = {"team1": team1, "team2": team2}
+    if season: params["season"] = season
+    return await _get("/fixtures/headtohead", params=params)
+
+async def get_fixture_statistics(fixture: int, halftime: bool = False) -> Dict[str, Any]:
+    """GET /fixtures/statistics?fixture=<>&half=<0|1>"""
+    return await _get("/fixtures/statistics", params={"fixture": fixture, "half": int(halftime)})
+
+async def get_fixture_events(fixture: int) -> Dict[str, Any]:
+    """GET /fixtures/events?fixture=<>"""
+    return await _get("/fixtures/events", params={"fixture": fixture})
+
+# -- Predictions (API-Football pre-match) -----------------------------------
+async def get_api_predictions(
+    fixture: int,
+    bookmaker: Optional[int] = None
+) -> Dict[str, Any]:
+    """GET /predictions?fixture=<>&[bookmaker=<>]"""
+    params = {"fixture": fixture}
+    if bookmaker: params["bookmaker"] = bookmaker
+    return await _get("/predictions", params=params)
+
+# -- Odds (Pre-Match) --------------------------------------------------------
+async def get_odds_by_fixture(
+    fixture: int, bookmaker: Optional[int] = None
+) -> Dict[str, Any]:
+    """GET /odds?fixture=<>&[bookmaker=<>]"""
+    params = {"fixture": fixture}
+    if bookmaker: params["bookmaker"] = bookmaker
+    return await _get("/odds", params=params)
+
+async def get_odds_mapping() -> Dict[str, Any]:
+    """GET /odds/mapping"""
+    return await _get("/odds/mapping")
+
+async def get_bookmakers() -> Dict[str, Any]:
+    """GET /odds/bookmakers"""
+    return await _get("/odds/bookmakers")

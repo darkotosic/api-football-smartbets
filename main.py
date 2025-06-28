@@ -1,23 +1,22 @@
 # api-football-smartbets/main.py
 
+from dotenv import load_dotenv
 import os
-from fastapi import FastAPI, HTTPException
+
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from typing import Optional
 
-from smartbets_API.api_football import (
-    get_fixtures_by_date,
-)
-from smartbets_API.predictor import Predictor
+# Učitaj .env
+load_dotenv()
 
-# Učitavanje ENV
+# Provera da li je API ključ postavljen
 API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY")
 if not API_FOOTBALL_KEY:
     raise RuntimeError("API_FOOTBALL_KEY nije postavljen u okruženju")
 
 app = FastAPI(
     title="API-Football Smartbets",
-    version="0.1.0",
+    version="0.2.0",
     description="FastAPI servis za predikcije i podatke iz API-Football"
 )
 
@@ -30,43 +29,24 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/fixtures/")
-async def fixtures(
-    date: str,
-    league: Optional[int] = None,
-    season: Optional[int] = None
-):
-    """
-    Vraća listu utakmica (fixtures) za zadati datum.
-    query params:
-      - date: YYYY-MM-DD
-      - league: opcioni ID lige
-      - season: opcioni sezon (npr. 2025)
-    """
-    try:
-        data = await get_fixtures_by_date(date, league, season)
-        return data.get("response", [])
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# Import svih rutera
+from routers.countries       import router as countries_router
+from routers.leagues         import router as leagues_router
+from routers.teams           import router as teams_router
+from routers.standings       import router as standings_router
+from routers.fixtures        import router as fixtures_router
+from routers.fixtures_extra  import router as fixtures_extra_router
+from routers.predictions     import router as predictions_router
+from routers.predictions_api import router as predictions_api_router
+from routers.odds            import router as odds_router
 
-@app.get("/predictions/")
-async def predictions(
-    date: str,
-    league: int,
-    season: int,
-    bookmaker: Optional[int] = None
-):
-    """
-    Vraća predikcije za sve utakmice tog datuma.
-    query params:
-      - date: YYYY-MM-DD
-      - league: ID lige (obavezno)
-      - season: godina sezone (obavezno)
-      - bookmaker: opcioni ID kladionice
-    """
-    try:
-        predictor = Predictor(league=league, season=season, bookmaker=bookmaker)
-        results = await predictor.predict_by_date(date)
-        return results
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+# Registruj rutere
+app.include_router(countries_router)
+app.include_router(leagues_router)
+app.include_router(teams_router)
+app.include_router(standings_router)
+app.include_router(fixtures_router)         # GET /fixtures/?...
+app.include_router(fixtures_extra_router)   # /fixtures/rounds, /fixtures/head2head, itd.
+app.include_router(predictions_router)      # GET /predictions/?...
+app.include_router(predictions_api_router)  # GET /predictions-api/?...
+app.include_router(odds_router)             # GET /odds/, /odds/mapping, /odds/bookmakers
