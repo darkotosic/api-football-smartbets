@@ -1,28 +1,36 @@
-# api-football-smartbets/routers/teams.py
+# api-football-smartbets/routers/leagues.py
 
 from fastapi import APIRouter, HTTPException
-from typing import List
+from typing import List, Optional
 
-from models import Team, TeamStatistics
-from smartbets_API.api_football import get_teams, get_team_statistics
+from models import League, LeagueSeasonList
+from smartbets_API.api_football import get_leagues, get_league_seasons
 
-router = APIRouter(prefix="/teams", tags=["teams"])
+router = APIRouter(prefix="/leagues", tags=["leagues"])
 
-@router.get("/", response_model=List[Team])
-async def read_teams(league: int, season: int) -> List[Team]:
+@router.get("/", response_model=List[League])
+async def read_leagues(country: Optional[str] = None) -> List[League]:
     try:
-        payload = await get_teams(league, season)
+        payload = await get_leagues(country)
         return payload.get("response", [])
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/{team_id}/statistics", response_model=List[TeamStatistics])
-async def read_team_stats(team_id: int, league: int, season: int) -> List[TeamStatistics]:
+@router.get("/{league_id}/seasons", response_model=LeagueSeasonList)
+async def read_league_seasons(league_id: int) -> LeagueSeasonList:
     try:
-        payload = await get_team_statistics(team_id, league, season)
-        return payload.get("response", [])
+        payload = await get_league_seasons(league_id)
+        resp = payload.get("response", [])
+        if not resp:
+            raise HTTPException(status_code=404, detail="League not found")
+        league_info = resp[0].get("league", {})
+        seasons = [s.get("season") for s in resp]
+        return LeagueSeasonList(
+            league=League.parse_obj(league_info),
+            seasons=seasons
+        )
     except HTTPException:
         raise
     except Exception as e:
