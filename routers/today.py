@@ -22,31 +22,42 @@ async def read_today(
 ):
     today_iso = date.today().isoformat()
     try:
-        fx_payload = await get_fixtures_by_date(today_iso, league, season)
-        fixtures = fx_payload.get("response", [])
+        fx_resp = await get_fixtures_by_date(today_iso, league, season)
+        fixtures = fx_resp.get("response", [])
 
+        # run your predictor
         predictor = Predictor(league=league, season=season, bookmaker=bookmaker)
         preds = await predictor.predict_by_date(today_iso)
-        pred_map = {p.fixture_id: p for p in preds}
+        pred_map = {p.fixture_id: p for p in preds if getattr(p, "fixture_id", None) is not None}
 
         out: List[TodayFixtureData] = []
         for fx in fixtures:
-            fid = fx["fixture"]["fixture_id"]
-            odds = (await get_odds_by_fixture(fid, bookmaker)).get("response", [])
-            h2h = (await get_head2head(
-                fx["teams"]["home"]["id"],
-                fx["teams"]["away"]["id"],
+            fid = fx.get("fixture", {}).get("fixture_id")
+            if fid is None:
+                continue
+
+            odds_resp = await get_odds_by_fixture(fid, bookmaker)
+            odds_list = odds_resp.get("response", [])
+
+            h2h_resp = await get_head2head(
+                fx.get("teams", {}).get("home", {}).get("id"),
+                fx.get("teams", {}).get("away", {}).get("id"),
                 season,
-            )).get("response", [])
+            )
+            h2h_list = h2h_resp.get("response", [])
+
             pred = pred_map.get(fid)
 
             out.append(TodayFixtureData(
                 fixture=fx,
-                odds=odds,
-                h2h=h2h,
+                odds=odds_list,
+                h2h=h2h_list,
                 prediction=pred,
             ))
+
         return out
 
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
