@@ -1,0 +1,39 @@
+# bytecode / caches
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# virtual envs
+.venv/
+env/
+venv/
+
+# local config / logs
+*.log
+*.sqlite3
+*.db
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# python packaging
+build/
+dist/
+*.egg-info/
+
+# git
+.git
+.gitignore
+
+# IDEs
+.vscode/
+.idea/
+
+# tests & docs (not needed at runtime)
+tests/
+docs/
+
+# dotenv
+.env
