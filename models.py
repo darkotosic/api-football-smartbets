@@ -1,12 +1,15 @@
+# models.py
 from __future__ import annotations
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
+# ── 1. COUNTRIES ─────────────────────────────────────────────────
 class Country(BaseModel):
     name: str
     code: Optional[str]
     flag: Optional[str]
 
+# ── 2. LEAGUES ────────────────────────────────────────────────────
 class League(BaseModel):
     id: int
     name: str
@@ -18,6 +21,7 @@ class LeagueSeasonList(BaseModel):
     league: League
     seasons: List[int]
 
+# ── 3. TEAMS ──────────────────────────────────────────────────────
 class Team(BaseModel):
     id: int
     name: str
@@ -27,6 +31,7 @@ class TeamStatistics(BaseModel):
     team: Team
     statistics: Dict[str, Any]
 
+# ── 4. STANDINGS ─────────────────────────────────────────────────
 class StandingEntry(BaseModel):
     rank: int
     team: Team
@@ -37,6 +42,7 @@ class StandingEntry(BaseModel):
     group: Optional[str]
     description: Optional[str]
 
+# ── 5. FIXTURES ──────────────────────────────────────────────────
 class FixtureInfo(BaseModel):
     id: int = Field(..., alias="fixture_id")
     referee: Optional[str]
@@ -67,6 +73,7 @@ class Fixture(BaseModel):
     status: FixtureStatus
     goals: Optional[Dict[str, Optional[int]]]
 
+# ── 6. EXTRA (ROUNDS/H2H/STAT/EVENTS) ────────────────────────────
 class Round(BaseModel):
     round: str
     start: str
@@ -88,18 +95,7 @@ class FixtureEvent(BaseModel):
     type: str
     detail: str
 
-class PredictionResponse(BaseModel):
-    fixture_id: int
-    teams: FixtureTeams
-    prediction: str
-    odds: List[Dict[str, Any]]
-    error: Optional[str]
-
-class APIPrediction(BaseModel):
-    league: League
-    teams: FixtureTeams
-    predictions: Dict[str, Any]
-
+# ── 7. ODDS ───────────────────────────────────────────────────────
 class OddsMappingEntry(BaseModel):
     odd: Optional[str]
     value: Optional[str]
@@ -107,7 +103,7 @@ class OddsMappingEntry(BaseModel):
 class BookmakerInfo(BaseModel):
     id: Optional[int]
     name: Optional[str]
-    bets: List[Dict[str, Any]] = Field(default_factory=list)
+    bets: List[Dict[str, Any]]
 
 class OddsResponse(BaseModel):
     league: League
@@ -115,8 +111,9 @@ class OddsResponse(BaseModel):
     bookmaker: BookmakerInfo
     bets: List[OddsMappingEntry]
 
-class TodayFixture(BaseModel):
+# ── 8. TODAY AGGREGATE ────────────────────────────────────────────
+class TodayFixtureData(BaseModel):
     fixture: Fixture
     statistics: List[FixtureStatistic]
-    head2head: List[Head2HeadEntry]
+    h2h: List[Head2HeadEntry]
     odds: List[OddsResponse]
