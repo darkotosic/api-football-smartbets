@@ -3,13 +3,13 @@ from __future__ import annotations
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field
 
-# ── 1. COUNTRIES ─────────────────────────────────────────────────
+# ── 1. COUNTRIES ────────────────────────────────────────────────────────────────
 class Country(BaseModel):
     name: str
     code: Optional[str]
     flag: Optional[str]
 
-# ── 2. LEAGUES ────────────────────────────────────────────────────
+# ── 2. LEAGUES ──────────────────────────────────────────────────────────────────
 class League(BaseModel):
     id: int
     name: str
@@ -21,7 +21,7 @@ class LeagueSeasonList(BaseModel):
     league: League
     seasons: List[int]
 
-# ── 3. TEAMS ──────────────────────────────────────────────────────
+# ── 3. TEAMS ────────────────────────────────────────────────────────────────────
 class Team(BaseModel):
     id: int
     name: str
@@ -31,7 +31,7 @@ class TeamStatistics(BaseModel):
     team: Team
     statistics: Dict[str, Any]
 
-# ── 4. STANDINGS ─────────────────────────────────────────────────
+# ── 4. STANDINGS ───────────────────────────────────────────────────────────────
 class StandingEntry(BaseModel):
     rank: int
     team: Team
@@ -42,7 +42,7 @@ class StandingEntry(BaseModel):
     group: Optional[str]
     description: Optional[str]
 
-# ── 5. FIXTURES ──────────────────────────────────────────────────
+# ── 5. FIXTURES ─────────────────────────────────────────────────────────────────
 class FixtureInfo(BaseModel):
     id: int = Field(..., alias="fixture_id")
     referee: Optional[str]
@@ -73,7 +73,7 @@ class Fixture(BaseModel):
     status: FixtureStatus
     goals: Optional[Dict[str, Optional[int]]]
 
-# ── 6. FIXTURE EXTRA (ROUNDS / H2H / STATS / EVENTS) ──────────────
+# ── 6. FIXTURE EXTRA (ROUNDS / H2H / STATS / EVENTS) ────────────────────────────
 class Round(BaseModel):
     round: str
     start: str
@@ -95,7 +95,7 @@ class FixtureEvent(BaseModel):
     type: str
     detail: str
 
-# ── 7. PREDICTIONS (YOUR ALGORITHM) ────────────────────────────────
+# ── 7. YOUR PREDICTIONS ──────────────────────────────────────────────────────────
 class PredictionResponse(BaseModel):
     fixture_id: int
     teams: FixtureTeams
@@ -103,13 +103,13 @@ class PredictionResponse(BaseModel):
     odds: List[Dict[str, Any]]
     error: Optional[str]
 
-# ── 8. API-FOOTBALL PREDICTIONS ───────────────────────────────────
+# ── 8. API-FOOTBALL PREDICTIONS ─────────────────────────────────────────────────
 class APIPrediction(BaseModel):
     league: League
     teams: FixtureTeams
     predictions: Dict[str, Any]
 
-# ── 9. ODDS (PRE-MATCH) ───────────────────────────────────────────
+# ── 9. ODDS (PRE-MATCH) ──────────────────────────────────────────────────────────
 class OddsMappingEntry(BaseModel):
     odd: str
     value: str
@@ -125,7 +125,7 @@ class OddsResponse(BaseModel):
     bookmaker: BookmakerInfo
     bets: List[OddsMappingEntry]
 
-# ── 10. TODAY AGGREGATE ────────────────────────────────────────────
+# ── 10. TODAY AGGREGATE ─────────────────────────────────────────────────────────
 class TodayFixtureData(BaseModel):
     fixture: Fixture
     statistics: List[FixtureStatistic]
