@@ -31,6 +31,9 @@ async def get_leagues(country: Optional[str] = None) -> Dict[str, Any]:
 async def get_league_seasons(league_id: int) -> Dict[str, Any]:
     return await _get(f"/leagues/{league_id}/seasons")
 
+# alias for your routers
+get_seasons = get_league_seasons
+
 # ── 3. TEAMS ──────────────────────────────────────────────────────────────────────
 async def get_teams(league: int, season: int) -> Dict[str, Any]:
     return await _get("/teams", {"league": league, "season": season})
