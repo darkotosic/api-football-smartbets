@@ -1,6 +1,7 @@
 import os
 from typing import Any, Dict, Optional
 import httpx
+from ._http import _get
 
 # Učitaj ključ iz okružnja
 API_FOOTBALL_KEY = os.getenv("API_FOOTBALL_KEY")
@@ -190,3 +191,47 @@ async def get_odds_mapping() -> Dict[str, Any]:
 async def get_bookmakers() -> Dict[str, Any]:
     """GET /odds/bookmakers"""
     return await _get("/odds/bookmakers")
+
+# NEW PART
+async def get_fixtures_by_date(
+    date: str,
+    league: Optional[int] = None,
+    season: Optional[int] = None,
+) -> Dict[str, Any]:
+    """
+    GET /fixtures?date=YYYY-MM-DD[&league=ID][&season=YEAR]
+    """
+    params = {"date": date}
+    if league is not None:
+        params["league"] = league
+    if season is not None:
+        params["season"] = season
+    return await _get("/fixtures", params=params)
+
+
+async def get_odds_by_fixture(
+    fixture: int,
+    bookmaker: Optional[int] = None,
+) -> Dict[str, Any]:
+    """
+    GET /odds?fixture=ID[&bookmaker=ID]
+    """
+    params = {"fixture": fixture}
+    if bookmaker is not None:
+        params["bookmaker"] = bookmaker
+    return await _get("/odds", params=params)
+
+
+async def get_head2head(
+    home: int,
+    away: int,
+    season: Optional[int] = None,
+) -> Dict[str, Any]:
+    """
+    GET /fixtures/headtohead?h2h=HOME-AWAY[&season=YEAR]
+    """
+    params = {"h2h": f"{home}-{away}"}
+    if season is not None:
+        params["season"] = season
+    return await _get("/fixtures/headtohead", params=params)
+
