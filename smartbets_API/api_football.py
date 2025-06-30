@@ -19,6 +19,30 @@ async def _get(endpoint: str, params: Optional[Dict[str, Any]] = None) -> Dict[s
         resp.raise_for_status()
         return resp.json()
 
+# ── 1. COUNTRIES ──────────────────────────────────────────────────────────────────
+async def get_countries() -> Dict[str, Any]:
+    return await _get("/countries")
+
+# ── 2. LEAGUES ────────────────────────────────────────────────────────────────────
+async def get_leagues(country: Optional[str] = None) -> Dict[str, Any]:
+    params = {"country": country} if country else None
+    return await _get("/leagues", params)
+
+async def get_league_seasons(league_id: int) -> Dict[str, Any]:
+    return await _get(f"/leagues/{league_id}/seasons")
+
+# ── 3. TEAMS ──────────────────────────────────────────────────────────────────────
+async def get_teams(league: int, season: int) -> Dict[str, Any]:
+    return await _get("/teams", {"league": league, "season": season})
+
+async def get_team_statistics(team: int, league: int, season: int) -> Dict[str, Any]:
+    return await _get("/teams/statistics", {"team": team, "league": league, "season": season})
+
+# ── 4. STANDINGS ─────────────────────────────────────────────────────────────────
+async def get_standings(league: int, season: int) -> Dict[str, Any]:
+    return await _get("/standings", {"league": league, "season": season})
+
+# ── 5. FIXTURES ──────────────────────────────────────────────────────────────────
 async def get_fixtures_by_date(
     date: str,
     league: Optional[int] = None,
@@ -31,14 +55,9 @@ async def get_fixtures_by_date(
         params["season"] = season
     return await _get("/fixtures", params)
 
-async def get_odds_by_fixture(
-    fixture: int,
-    bookmaker: Optional[int] = None
-) -> Dict[str, Any]:
-    params: Dict[str, Any] = {"fixture": fixture}
-    if bookmaker is not None:
-        params["bookmaker"] = bookmaker
-    return await _get("/odds", params)
+# ── 6. FIXTURE EXTRA ──────────────────────────────────────────────────────────────
+async def get_fixture_statistics(fixture: int) -> Dict[str, Any]:
+    return await _get(f"/fixtures/{fixture}/statistics")
 
 async def get_head2head(
     team1: int,
@@ -49,3 +68,19 @@ async def get_head2head(
     if season is not None:
         params["season"] = season
     return await _get("/fixtures/headtohead", params)
+
+# ── 7. ODDS ────────────────────────────────────────────────────────────────────────
+async def get_odds_by_fixture(
+    fixture: int,
+    bookmaker: Optional[int] = None
+) -> Dict[str, Any]:
+    params: Dict[str, Any] = {"fixture": fixture}
+    if bookmaker is not None:
+        params["bookmaker"] = bookmaker
+    return await _get("/odds", params)
+
+async def get_bookmakers() -> Dict[str, Any]:
+    return await _get("/odds/bookmakers")
+
+async def get_odds_mapping() -> Dict[str, Any]:
+    return await _get("/odds/mapping")
