@@ -154,3 +154,11 @@ class OddsResponse(CustomBaseModel):
     fixture: FixtureInfo = Field(default_factory=FixtureInfo)
     bookmaker: BookmakerInfo = Field(default_factory=BookmakerInfo)
     bets: List[OddsMappingEntry] = Field(default_factory=list)
+
+# ── 10. TODAY  ─────────────────────────────────────────────────────────────────────
+
+class TodayFixtureData(BaseModel):
+    fixture: Fixture
+    odds: List[OddsResponse]
+    h2h: List[Head2HeadEntry]
+    prediction: Optional[PredictionResponse]
