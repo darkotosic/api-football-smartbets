@@ -21,9 +21,9 @@ router = APIRouter(prefix="/today", tags=["today"])
 
 @router.get("/", response_model=List[TodayFixtureData])
 async def read_today():
-    today = datetime.date.today().isoformat()
+    date_str = datetime.date.today().isoformat()
     try:
-        fx_payload = await get_fixtures(today)
+        fx_payload = await get_fixtures(date_str)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
