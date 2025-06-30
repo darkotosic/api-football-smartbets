@@ -195,43 +195,31 @@ async def get_bookmakers() -> Dict[str, Any]:
 # NEW PART
 async def get_fixtures_by_date(
     date: str,
-    league: Optional[int] = None,
-    season: Optional[int] = None,
-) -> Dict[str, Any]:
-    """
-    GET /fixtures?date=YYYY-MM-DD[&league=ID][&season=YEAR]
-    """
+    league: int | None = None,
+    season: int | None = None,
+) -> dict:
     params = {"date": date}
     if league is not None:
         params["league"] = league
     if season is not None:
         params["season"] = season
-    return await _get("/fixtures", params=params)
-
+    return await _get("/fixtures", params)
 
 async def get_odds_by_fixture(
     fixture: int,
-    bookmaker: Optional[int] = None,
-) -> Dict[str, Any]:
-    """
-    GET /odds?fixture=ID[&bookmaker=ID]
-    """
+    bookmaker: int | None = None,
+) -> dict:
     params = {"fixture": fixture}
     if bookmaker is not None:
         params["bookmaker"] = bookmaker
-    return await _get("/odds", params=params)
-
+    return await _get("/odds", params)
 
 async def get_head2head(
     home: int,
     away: int,
-    season: Optional[int] = None,
-) -> Dict[str, Any]:
-    """
-    GET /fixtures/headtohead?h2h=HOME-AWAY[&season=YEAR]
-    """
+    season: int | None = None,
+) -> dict:
     params = {"h2h": f"{home}-{away}"}
     if season is not None:
         params["season"] = season
-    return await _get("/fixtures/headtohead", params=params)
-
+    return await _get("/fixtures/headtohead", params)
