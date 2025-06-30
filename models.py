@@ -1,31 +1,27 @@
+# api-football-smartbets/models.py
+
 from __future__ import annotations
 from typing import List, Optional, Dict, Any
-from datetime import date
 from pydantic import BaseModel, Field, ConfigDict
-
 
 class CustomBaseModel(BaseModel):
     """
-    Bazna klasa za sve modele:
-    - Ignoriše extra polja iz API-ja
-    - Dozvoljava populaciju po alias-ima
+    Base for all our models:
+    - ignore extra fields from API
+    - allow population by alias
     """
     model_config = ConfigDict(
         extra="ignore",
         populate_by_name=True,
     )
 
-
-# ── 1. COUNTRIES ─────────────────────────────────────────────────────────────────
-
+# 1. COUNTRY
 class Country(CustomBaseModel):
     name: Optional[str] = None
     code: Optional[str] = None
     flag: Optional[str] = None
 
-
-# ── 2. LEAGUES ────────────────────────────────────────────────────────────────────
-
+# 2. LEAGUE
 class League(CustomBaseModel):
     id: Optional[int] = None
     name: Optional[str] = None
@@ -37,9 +33,7 @@ class LeagueSeasonList(CustomBaseModel):
     league: League = Field(default_factory=League)
     seasons: List[int] = Field(default_factory=list)
 
-
-# ── 3. TEAMS ──────────────────────────────────────────────────────────────────────
-
+# 3. TEAM
 class Team(CustomBaseModel):
     id: Optional[int] = None
     name: Optional[str] = None
@@ -49,9 +43,7 @@ class TeamStatistics(CustomBaseModel):
     team: Team = Field(default_factory=Team)
     statistics: Dict[str, Any] = Field(default_factory=dict)
 
-
-# ── 4. STANDINGS ─────────────────────────────────────────────────────────────────
-
+# 4. STANDINGS
 class StandingEntry(CustomBaseModel):
     rank: Optional[int] = None
     team: Team = Field(default_factory=Team)
@@ -63,9 +55,7 @@ class StandingEntry(CustomBaseModel):
     description: Optional[str] = None
     all: Dict[str, Any] = Field(default_factory=dict)
 
-
-# ── 5. FIXTURES ──────────────────────────────────────────────────────────────────
-
+# 5. FIXTURES
 class FixtureInfo(CustomBaseModel):
     id: Optional[int] = Field(None, alias="fixture_id")
     referee: Optional[str] = None
@@ -96,14 +86,7 @@ class Fixture(CustomBaseModel):
     status: FixtureStatus = Field(default_factory=FixtureStatus)
     goals: Dict[str, Optional[int]] = Field(default_factory=dict)
 
-
-# ── 6. FIXTURE EXTRA (ROUNDS / H2H / STATS / EVENTS) ──────────────────────────────
-
-class Round(CustomBaseModel):
-    round: Optional[str] = None
-    start: Optional[str] = None
-    end: Optional[str] = None
-
+# 6. HEAD-TO-HEAD & STATS & EVENTS
 class Head2HeadEntry(CustomBaseModel):
     fixture: FixtureInfo = Field(default_factory=FixtureInfo)
     teams: FixtureTeams = Field(default_factory=FixtureTeams)
@@ -120,9 +103,7 @@ class FixtureEvent(CustomBaseModel):
     type: Optional[str] = None
     detail: Optional[str] = None
 
-
-# ── 7. YOUR PREDICTIONS ────────────────────────────────────────────────────────────
-
+# 7. PREDICTIONS
 class PredictionResponse(CustomBaseModel):
     fixture_id: Optional[int] = None
     teams: FixtureTeams = Field(default_factory=FixtureTeams)
@@ -130,17 +111,12 @@ class PredictionResponse(CustomBaseModel):
     odds: List[Dict[str, Any]] = Field(default_factory=list)
     error: Optional[str] = None
 
-
-# ── 8. API-FOOTBALL PREDICTIONS ───────────────────────────────────────────────────
-
 class APIPrediction(CustomBaseModel):
     league: League = Field(default_factory=League)
     teams: FixtureTeams = Field(default_factory=FixtureTeams)
     predictions: Dict[str, Any] = Field(default_factory=dict)
 
-
-# ── 9. ODDS (PRE-MATCH) ───────────────────────────────────────────────────────────
-
+# 8. ODDS
 class OddsMappingEntry(CustomBaseModel):
     odd: Optional[str] = None
     value: Optional[str] = None
@@ -156,11 +132,9 @@ class OddsResponse(CustomBaseModel):
     bookmaker: BookmakerInfo = Field(default_factory=BookmakerInfo)
     bets: List[OddsMappingEntry] = Field(default_factory=list)
 
-# — 10. TODAY ————————————————————————————————————————————————————————————————
-
-class TodayFixtureData(BaseModel):
-    fixture: Fixture
-    odds: List[OddsResponse]
-    h2h: List[Head2HeadEntry]
+# 9. TODAY AGGREGATE
+class TodayFixtureData(CustomBaseModel):
+    fixture: Fixture = Field(default_factory=Fixture)
+    odds: List[OddsResponse] = Field(default_factory=list)
+    h2h: List[Head2HeadEntry] = Field(default_factory=list)
     prediction: Optional[PredictionResponse] = None
-
