@@ -156,19 +156,11 @@ class OddsResponse(CustomBaseModel):
     bookmaker: BookmakerInfo = Field(default_factory=BookmakerInfo)
     bets: List[OddsMappingEntry] = Field(default_factory=list)
 
-# ── 10. TODAY  ─────────────────────────────────────────────────────────────────────
-
+# — 10. TODAY ————————————————————————————————————————————————————————————————
 class TodayFixtureData(BaseModel):
     fixture: Fixture
     odds: List[OddsResponse]
     h2h: List[Head2HeadEntry]
-    prediction: Optional[PredictionResponse]
+    prediction: Optional[PredictionResponse] = None
 
-# ── NEW: TODAY AGGREGATE ──────────────────────────────────────────────────────────────
-
-class TodayFixture(BaseModel):
-    fixture: Fixture          # info o utakmici
-    statistics: List[FixtureStatistic]
-    head2head: List[Head2HeadEntry]
-    odds: List[OddsResponse]
 
