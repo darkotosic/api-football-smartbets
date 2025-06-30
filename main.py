@@ -14,6 +14,7 @@ from routers.fixtures_extra import router as fixtures_router
 from routers.predictions   import router as predictions_router
 from routers.predictions_api import router as predictions_api_router
 from routers.odds          import router as odds_router
+from routers.today         import router as today_router
 
 # load .env and verify API key
 load_dotenv()
@@ -45,3 +46,4 @@ app.include_router(fixtures_router)
 app.include_router(predictions_router)
 app.include_router(predictions_api_router)
 app.include_router(odds_router)
+app.include_router(today_router)
