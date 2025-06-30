@@ -1,17 +1,18 @@
-# api-football-smartbets/models.py
-
 from __future__ import annotations
 from typing import List, Optional, Dict, Any
 from pydantic import BaseModel, Field, ConfigDict
 
+
 class CustomBaseModel(BaseModel):
-    # Pydantic v2: extra polja ignorišemo, a dozvoljavamo 
-    # populaciju po aliasu (field_name <-> alias)
+    """
+    Bazna klasa za sve modele:
+    - Ignoriše extra polja iz API-ja
+    - Dozvoljava populaciju po alias-ima
+    """
     model_config = ConfigDict(
         extra="ignore",
         populate_by_name=True,
     )
-
 
 
 # ── 1. COUNTRIES ─────────────────────────────────────────────────────────────────
