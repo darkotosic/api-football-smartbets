@@ -1,4 +1,3 @@
-# smartbets_API/api_football.py
 import os
 import httpx
 from typing import Any, Dict, Optional
@@ -18,21 +17,23 @@ async def _get(path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, 
         resp.raise_for_status()
         return resp.json()
 
-# ───────────────────────────────────────────────────────────────────────────────
-# 1) COUNTRIES
+
+# ─────────────────── COUNTRIES ───────────────────
 async def get_countries():
     return await _get("/countries")
 
-# 2) LEAGUES
+
+# ─────────────────── LEAGUES ─────────────────────
 async def get_leagues(country: Optional[str] = None):
     return await _get("/leagues", {"country": country} if country else None)
 
 async def get_league_seasons(league: int):
     return await _get(f"/leagues/{league}/seasons")
 
-get_seasons = get_league_seasons        # старо име које користи routers/leagues.py
+get_seasons = get_league_seasons            # alias
 
-# 3) TEAMS
+
+# ─────────────────── TEAMS ───────────────────────
 async def get_teams(league: int, season: int):
     return await _get("/teams", {"league": league, "season": season})
 
@@ -40,22 +41,22 @@ async def get_team_statistics(team: int, league: int, season: int):
     return await _get("/teams/statistics",
                       {"team": team, "league": league, "season": season})
 
-# 4) STANDINGS
+
+# ─────────────────── STANDINGS ───────────────────
 async def get_standings(league: int, season: int):
     return await _get("/standings", {"league": league, "season": season})
 
-# 5) FIXTURES
+
+# ─────────────────── FIXTURES ────────────────────
 async def get_fixtures(date: str,
                        league: Optional[int] = None,
                        season: Optional[int] = None):
     params: Dict[str, Any] = {"date": date}
-    if league is not None:
-        params["league"] = league
-    if season is not None:
-        params["season"] = season
+    if league is not None:  params["league"] = league
+    if season is not None:  params["season"] = season
     return await _get("/fixtures", params)
 
-get_fixtures_by_date = get_fixtures      # користи predictor.py
+get_fixtures_by_date = get_fixtures          # alias
 
 async def get_fixtures_rounds(league: int, season: int):
     return await _get("/fixtures/rounds", {"league": league, "season": season})
@@ -66,20 +67,22 @@ async def get_fixture_statistics(fixture: int):
 async def get_fixture_events(fixture: int):
     return await _get("/fixtures/events", {"fixture": fixture})
 
-# 6) H2H
+
+# ─────────────────── HEAD-TO-HEAD ────────────────
 async def get_head_to_head(fixture: int):
     return await _get("/fixtures/headtohead", {"fixture": fixture})
 
-get_head2head = get_head_to_head         # старо име из routers/fixtures_extra.py
+get_head2head = get_head_to_head             # alias
 
-# 7) ODDS
+
+# ─────────────────── ODDS ────────────────────────
 async def get_odds(fixture: int, bookmaker: Optional[int] = None):
     params = {"fixture": fixture}
     if bookmaker is not None:
         params["bookmaker"] = bookmaker
     return await _get("/odds", params)
 
-get_odds_by_fixture = get_odds           # очекује predictor.py
+get_odds_by_fixture = get_odds               # alias
 
 async def get_odds_mapping():
     return await _get("/odds/mapping")
@@ -87,7 +90,10 @@ async def get_odds_mapping():
 async def get_odds_bookmakers():
     return await _get("/odds/bookmakers")
 
-# 8) PREDICTIONS (API-Football)
+
+# ──────────────── API-FOOTBALL PREDICTIONS ───────
 async def get_predictions_api(date: str, league: int, season: int):
     return await _get("/predictions",
                       {"date": date, "league": league, "season": season})
+
+get_api_predictions = get_predictions_api    # alias за routers/predictions_api.py
