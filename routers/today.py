@@ -1,63 +1,33 @@
-# api-football-smartbets/routers/today.py
-
 from fastapi import APIRouter, HTTPException
-from typing import List, Optional
-from datetime import date
-
-from models import TodayFixtureData
-from smartbets_API.api_football import (
-    get_fixtures_by_date,
-    get_odds_by_fixture,
-    get_head2head,
-)
-from smartbets_API.predictor import Predictor
+from typing import List
+from models import TodayFixture
+from smartbets_API.api_football import get_fixtures_by_date, get_odds_by_fixture, get_fixture_statistics, get_head2head
 
 router = APIRouter(prefix="/today", tags=["today"])
 
-@router.get("/", response_model=List[TodayFixtureData])
-async def read_today(
-    league: Optional[int] = None,
-    season: Optional[int] = None,
-    bookmaker: Optional[int] = None,
-):
-    today_iso = date.today().isoformat()
-    try:
-        fx_resp = await get_fixtures_by_date(today_iso, league, season)
-        fixtures = fx_resp.get("response", [])
+@router.get("/", response_model=List[TodayFixture])
+async def read_today():
+    import datetime
+    today = datetime.date.today().isoformat()
+    # 1) get all fixtures for today
+    fx = await get_fixtures_by_date(today)
+    fixtures = fx.get("response", [])
 
-        # run your predictor
-        predictor = Predictor(league=league, season=season, bookmaker=bookmaker)
-        preds = await predictor.predict_by_date(today_iso)
-        pred_map = {p.fixture_id: p for p in preds if getattr(p, "fixture_id", None) is not None}
-
-        out: List[TodayFixtureData] = []
-        for fx in fixtures:
-            fid = fx.get("fixture", {}).get("fixture_id")
-            if fid is None:
-                continue
-
-            odds_resp = await get_odds_by_fixture(fid, bookmaker)
-            odds_list = odds_resp.get("response", [])
-
-            h2h_resp = await get_head2head(
-                fx.get("teams", {}).get("home", {}).get("id"),
-                fx.get("teams", {}).get("away", {}).get("id"),
-                season,
-            )
-            h2h_list = h2h_resp.get("response", [])
-
-            pred = pred_map.get(fid)
-
-            out.append(TodayFixtureData(
-                fixture=fx,
-                odds=odds_list,
-                h2h=h2h_list,
-                prediction=pred,
-            ))
-
-        return out
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    results = []
+    for f in fixtures:
+        fid = f["fixture"]["fixture_id"]
+        # 2) odds
+        odds = (await get_odds_by_fixture(fid)).get("response", [])
+        # 3) stats
+        stats = (await get_fixture_statistics(fid)).get("response", [])
+        # 4) h2h
+        t1 = f["teams"]["home"]["id"]
+        t2 = f["teams"]["away"]["id"]
+        h2h = (await get_head2head(t1, t2)).get("response", [])
+        results.append(TodayFixture(
+            fixture=f,
+            statistics=stats,
+            head2head=h2h,
+            odds=odds
+        ))
+    return results
