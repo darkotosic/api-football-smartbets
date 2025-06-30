@@ -90,6 +90,8 @@ async def get_odds_mapping():
 async def get_odds_bookmakers():
     return await _get("/odds/bookmakers")
 
+# ——— алијас за routers/odds.py ———
+get_bookmakers = get_odds_bookmakers
 
 # ──────────────── API-FOOTBALL PREDICTIONS ───────
 async def get_predictions_api(date: str, league: int, season: int):
