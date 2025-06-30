@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import List, Optional, Dict, Any
+from datetime import date
 from pydantic import BaseModel, Field, ConfigDict
 
 
@@ -162,3 +163,12 @@ class TodayFixtureData(BaseModel):
     odds: List[OddsResponse]
     h2h: List[Head2HeadEntry]
     prediction: Optional[PredictionResponse]
+
+# ── NEW: TODAY AGGREGATE ──────────────────────────────────────────────────────────────
+
+class TodayFixture(BaseModel):
+    fixture: Fixture          # info o utakmici
+    statistics: List[FixtureStatistic]
+    head2head: List[Head2HeadEntry]
+    odds: List[OddsResponse]
+
